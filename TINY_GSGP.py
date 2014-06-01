@@ -22,7 +22,6 @@ This implementation is to evolve Boolean expressions. It can be easily adapted t
 '''
 
 import random
-from operator import add 
 import itertools
 
 #### PARAMETERS ####
@@ -111,7 +110,7 @@ def evolve():
     for gen in xrange(GENERATIONS+1):
         graded_pop = [ (fitness(ind), ind) for ind in pop ] # evaluate population fitness
         sorted_pop = [ ind[1] for ind in sorted(graded_pop)] # sort population on fitness
-        print 'gen: ', gen , ' min fit: ', fitness(sorted_pop[0]), ' avg fit: ', reduce(add, (ind[0] for ind in graded_pop))/(POPSIZE*1.0) # print stats
+        print 'gen: ', gen , ' min fit: ', fitness(sorted_pop[0]), ' avg fit: ', sum(ind[0] for ind in graded_pop)/(POPSIZE*1.0) # print stats
         parent_pop = sorted_pop[:int(TRUNC*POPSIZE)] # selected parents
         if gen == GENERATIONS: break
         for i in xrange(POPSIZE): # create offspring population
