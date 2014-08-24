@@ -39,3 +39,5 @@ Features:
 
 - Algebraic simplification of offspring prevents exponential growth.
 
+- The final solution is short and understandable (no black-box).
+
