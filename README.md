@@ -20,3 +20,22 @@ Features:
 
 This implementation is to evolve Boolean expressions. It can be easily adapted to evolve arithmetic expressions or classifiers.
 
+TINY_GSGP.nb: 
+=============
+
+A Tiny Implementation of Geometric Semantic Genetic Programming in Mathematica Using Algebraic Simplification.
+
+Author: Alberto Moraglio (albmor@gmail.com)
+
+This is a reimplementation of TINY_GSGP.py in Mathematica to compare the effect of simplification of offsrping. 
+
+Features:
+
+- Individuals are represented using symbolic expressions (Boolean expressions).
+
+- Uniform initialisation/generation of random expressions.
+
+- Crossover and mutation embed parent expressions in the offspring expression.
+
+- Algebraic simplification of offspring prevents exponential growth.
+
