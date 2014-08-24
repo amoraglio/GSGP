@@ -1,0 +1,62 @@
+(* ************************************************************************************************************;
+
+TINY_GSGP.nb: A Tiny Implementation of Geometric Semantic Genetic Programming in Mathematica Using Algebraic Simplification;
+
+Author: Alberto Moraglio (albmor@gmail.com);
+
+This is a reimplementation of TINY_GSGP.py in Mathematica to compare the effect of simplification of offsrping; 
+
+Features;
+- Individuals are represented using symbolic expressions (Boolean expressions);
+- Uniform initialisation/generation of random expressions;
+- Crossover and mutation embed parent expressions in the offspring expression;
+- Algebraic simplification of offspring prevents exponential growth;
+
+************************************************************************************************************ *)
+
+
+(****** PARAMETERS ******)
+
+NUMVARS=5 (* number of input variables *)
+(* DEPTH=4 *) (* maximum depth of expressions in the initial population *)
+POPSIZE=20 (* population size *)
+GENERATIONS=30 (* number of generations *)
+TRUNC=0.5 (* proportion of population to retain in truncation selection *)
+
+(************************)
+
+vars=Table[Symbol["x"<>ToString[i]],{i,NUMVARS}]; (* variable names *)
+
+targetfunct=Apply[Xor, vars]; (* parity function *)
+
+fitness[individual_]:= (* fitness (error) function, lower is better *)
+	Count[MapThread[Xor,{BooleanTable[targetfunct],BooleanTable[individual]}], True]; 
+
+crossover[p1_,p2_]:=Module[{mask}, (* crossover substitutes parent and mask expressions in crossover scheme to make offspring *)
+	mask=BooleanFunction[RandomInteger[2^(2^NUMVARS) - 1], vars];
+	(p1 && mask)||(p2 && !mask)];
+
+mutation[p_]:=Module[{minterm}, (* mutation substitutes parent and minterm expressions in mutation scheme to make offspring *)
+	minterm=BooleanMinterms[{Table[RandomInteger[],{NUMVARS}]},vars];
+	If[RandomInteger[]==0,p || minterm,p && !minterm]];
+
+(****** EVOLVE ******)
+
+pop =Table[BooleanFunction[RandomInteger[2^(2^NUMVARS) - 1], vars], {POPSIZE}]; (* initialise population with uniform distribution on functions *)
+For[gen=0,gen<GENERATIONS+1,gen++,
+	gradedpop = Table[{fitness[pop[[i]]],pop[[i]]},{i,POPSIZE}]; (* evaluate population fitness *)
+	sortedpop = Sort[gradedpop, #1[[1]]<#2[[1]]&] ; (* sort population on fitness *)
+	Print["gen: ",gen, " min fit: ",sortedpop[[1,1]]," avg fit: ", N[Mean[sortedpop[[All,1]]]]]; (* print stats *)
+	parentpop=sortedpop[[1;;Round[TRUNC*POPSIZE],2]]; (* selected parents *)
+	If[gen==GENERATIONS, Break[]];
+	For[i=1,i<POPSIZE+1,i++,(* create offspring population *)
+		par=RandomSample[parentpop,2]; (* pick two random parents *)
+		pop[[i]]=Simplify[mutation[crossover[par[[1]],par[[2]]]],TimeConstraint->0.1]; (* create offspring and simplify it *)
+	] 
+] 
+
+Print["Best individual in last population:"];
+Print[sortedpop[[1]]]; (* genotype of final solution *)
+Print[sortedpop[[1,2]]/.{x1->True,x2->True,x3->True,x4->True,x5->True}]; (* query genotype of final solution *)
+
+
