@@ -1,0 +1,51 @@
+(* ************************************************************************************************************;
+
+TINY_GSHCGP.nb:An Implementation of Geometric Semantic ***Hill Climber*** Genetic Programming in Mathematica Using Algebraic Simplification;
+
+Author:Alberto Moraglio (albmor@gmail.com);
+
+Features;
+- The fitness landscape seen by Geometric Semantic operators is always unimodal. A hill-climber can reach the optimum;
+- Mutation embeds parent expression in the offspring expression;
+- Algebraic simplification of offspring; 
+- Offspring size growth without simplification is linear in the number of generation (simplification is not strictly needed for space efficiency);
+- Final solution short and understandable;
+
+************************************************************************************************************ *)
+
+
+(****** PARAMETERS ******)
+
+NUMVARS=5; (* number of input variables *)
+GENERATIONS=300; (* number of generations *)
+
+(************************)
+
+vars = Table[Symbol["x"<>ToString[i]],{i,NUMVARS}]; (* variable names *)
+
+targetfunct = Apply[Xor, vars]; (* parity function *)
+
+fitness[individual_] := (* fitness (error) function, lower is better *)
+	Count[MapThread[Xor,{BooleanTable[targetfunct],BooleanTable[individual]}], True]; 
+
+mutation[p_] := Module[{minterm}, (* mutation substitutes parent and minterm expressions in mutation scheme to make offspring *)
+	minterm=BooleanMinterms[{Table[RandomInteger[],{NUMVARS}]},vars];
+	If[RandomInteger[]==0, p || minterm, p && !minterm]];
+
+(****** CLIMB ******)
+
+curr = BooleanFunction[RandomInteger[2^(2^NUMVARS) - 1], vars]; (* initial individual *)
+currfit = fitness[curr]; (* evaluate fitness *)
+For[gen=0, gen<GENERATIONS+1, gen++,
+	off = mutation[curr]; (* create offspring *)
+	offfit = fitness[off]; (* fitness offspring *)
+	If[offfit < currfit, 
+		curr = Simplify[off, TimeConstraint->0.1]; (* offspring is simplified and replaces parent if better *)
+		currfit = offfit]; (* update fitness *)
+	If[Mod[gen , 10]==0, Print["gen: ",gen, " fit: ",currfit]]; (* print stats *)
+] 
+
+Print["Best individual:"];
+Print[curr]; (* genotype of final solution *)
+Print[curr/.{x1->True,x2->True,x3->True,x4->True,x5->True}]; (* query genotype of final solution *)
+
