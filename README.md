@@ -41,3 +41,29 @@ Features:
 
 - The final solution is short and understandable (no black-box).
 
+TINY_GSHCGP.py: 
+===============
+
+An Implementation of Geometric Semantic *Hill Climber* Genetic Programming Using Higher-Order Functions and Memoization
+
+Author: Alberto Moraglio (albmor@gmail.com)
+
+Features:
+
+- Same as TINY_GSGP.py, substituting the evolutionary algorithm with a hill-climber.
+
+- The fitness landscape seen by Geometric Semantic operators is always unimodal. A hill climber can reach the optimum.
+
+- Offspring functions call parent functions rather than embed their definitions (no grwoth, implicit ancestry trace).
+
+- Even if offspring functions embedded parent function definition, the growth is linear in the number of generation (not exponential as with crossover). 
+
+- Memoization of individuals turns time complexity of fitness evalutation from linear to constant (not exponential to constant as with crossover).
+
+- Implicit ancestry trace and memoization not strictly necessary with hill-climber for efficent implementation.
+
+- The final solution is a compiled function. It can be extracted using the ancestry trace to reconstruct its 'source code'. 
+
+This implementation is to evolve Boolean expressions. It can be easily adapted to evolve arithmetic expressions or classifiers.
+
+
