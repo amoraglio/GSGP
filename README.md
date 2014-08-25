@@ -66,4 +66,21 @@ Features:
 
 This implementation is to evolve Boolean expressions. It can be easily adapted to evolve arithmetic expressions or classifiers.
 
+TINY_GSHCGP.nb:
+===============
 
+An Implementation of Geometric Semantic *Hill Climber* Genetic Programming in Mathematica Using Algebraic Simplification.
+
+Author: Alberto Moraglio (albmor@gmail.com)
+
+Features:
+
+- The fitness landscape seen by Geometric Semantic operators is always unimodal. A hill-climber can reach the optimum.
+
+- Mutation embeds parent expression in the offspring expression.
+
+- Algebraic simplification of offspring.
+
+- Offspring size growth without simplification is linear in the number of generation (simplification is not strictly needed for space efficiency).
+
+- Final solution short and understandable.
