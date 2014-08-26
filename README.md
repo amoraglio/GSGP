@@ -90,7 +90,7 @@ TINY_GSHCGP _ARIT.nb:
 
 Geometric Semantic Hill Climber Genetic Programming in Mathematica for *Arithmetic Expressions*.
 
-Author:Alberto Moraglio (albmor@gmail.com)
+Author: Alberto Moraglio (albmor@gmail.com)
 
 Features:
 
@@ -100,6 +100,23 @@ Features:
 
 - Algebraic simplification of offspring.
 
-- Generalisation test (on unseen examples). 
+- Generalisation test (on unseen examples).
+
+TINY_GSGP _ARIT.nb: 
+===================
+
+Geometric Semantic Genetic Programming in Mathematica for *Arithmetic Expressions*.
+
+Author: Alberto Moraglio (albmor@gmail.com)
+
+Features:
+
+- It evolves arithmentic expressions (polynomials or fractional polynomials if division is used).
+
+- Fithess is based on a training set (not on all inputs as for Boolean expressions).
+
+- Algebraic simplification of offspring.
+
+- Generalisation test (on unseen examples).
  
 
