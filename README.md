@@ -84,3 +84,22 @@ Features:
 - Offspring size growth without simplification is linear in the number of generation (simplification is not strictly needed for space efficiency).
 
 - Final solution short and understandable.
+
+TINY_GSHCGP _ARIT.nb: 
+=====================
+
+Geometric Semantic Hill Climber Genetic Programming in Mathematica for *Arithmetic Expressions*.
+
+Author:Alberto Moraglio (albmor@gmail.com)
+
+Features:
+
+- It searches the space of arithmentic expressions (polynomials or fractional polynomials if division is used).
+
+- Fithess is based on a training set (not on all inputs as for Boolean expressions). 
+
+- Algebraic simplification of offspring.
+
+- Generalisation test (on unseen examples). 
+ 
+
