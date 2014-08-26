@@ -1,0 +1,78 @@
+(* ************************************************************************************************************;
+
+TINY_GSHCGP _ARIT.nb: Geometric Semantic Hill Climber Genetic Programming in Mathematica for Arithmetic Expressions;
+
+Author:Alberto Moraglio (albmor@gmail.com);
+
+Features;
+- It searches the space of arithmentic expressions (polynomials or fractional polynomials if division is used);
+- Fithess is based on a training set (not on all inputs as for Boolean expressions); 
+- Algebraic simplification of offspring;
+- Generalisation test (on unseen examples); 
+
+************************************************************************************************************ *)
+
+
+(****** PARAMETERS ******)
+
+NUMVARS=5; (* number of input variables *)
+DEPTH=4; (* maximum depth of expressions in the initial population *)
+GENERATIONS=1000; (* number of generations *)
+NUMCASES = 10000; (* number of training examples *)
+MUTSTEP = 0.01; (* mutation step size *)
+
+(************************)
+
+vars = Table[Symbol["x"<>ToString[i]],{i,NUMVARS}]; (* variable names *)
+
+randexpr[dep_]:= (* Create a random arithmetic expression *)
+	If[dep==1 || RandomReal[] < N[1.0/(2^dep-1)], (* terminal *)
+		If[RandomReal[]>N[1/(NUMVARS+1)], 
+			Return[RandomChoice[vars]], (* variable *)
+			RandomReal[{-1,1}]], (* number *)
+	If[RandomReal[]<N[1.0/5], 
+		Return[- randexpr[dep-1]], (* unary operation *)
+		Return[Apply[RandomChoice[{(#1+#2)&, (#1-#2)&,(#1*#2)& (*, (#1/#2)&*)}],{randexpr[dep-1],randexpr[dep-1]}]]]] (* binary operations *)
+
+(****** TRAINING SET ******)
+
+targetexpr = randexpr[DEPTH]; (* target is a random expression *)
+Print["Target expression: ", targetexpr];
+targetfunct = Function[Evaluate[vars],Evaluate[targetexpr]]; (* convert target into a function *)
+traininginputs = Table[RandomReal[{-1,1},NUMVARS],{NUMCASES}]; (* generate training inputs uniformly at random *)
+trainingoutputs =MapThread[targetfunct,traininginputs]; (* compute target outputs *)
+
+(**************************)
+
+fitness[individual_]:= Module[{indfunct, indoutputs},(* fitness (error) function, lower is better *)
+	indfunct= Function[Evaluate[vars],Evaluate[individual]]; (* convert individual into a function *)
+	indoutputs =MapThread[indfunct,traininginputs]; (* compute individual outputs *)
+	EuclideanDistance[indoutputs,trainingoutputs]] ;  (* finess is distance between output vectors *)
+
+mutation[p_]:= p + MUTSTEP * (randexpr[DEPTH]-randexpr[DEPTH]); (* mutation perturbs parent with zero-average random function *)
+
+(****** CLIMB ******)
+
+curr =randexpr[DEPTH]; (* initial individual *)
+currfit = fitness[curr]; (* evaluate fitness *)
+For[gen=0,gen<GENERATIONS+1,gen++,
+	off = mutation[curr]; (* create offspring *)
+	offfit = fitness[off]; (* fitness offspring *)
+	If[offfit < currfit, 
+		curr = Simplify[off, TimeConstraint->0.1]; (* offspring is simplified and replaces parent if better *)
+		currfit = offfit]; (* update fitness *)
+	If[Mod[gen , 10]==0, Print["gen: ",gen, " fit: ",currfit]]; (* print stats *)
+] 
+
+Print["Best individual:"];
+Print[curr]; (* genotype of final solution *)
+
+(****** GENERALISATION TEST ******)
+
+Print["Training error: ", currfit]; (* fitness of best individual is training error *)
+traininginputs = Table[RandomReal[{-1,1},NUMVARS],{NUMCASES}]; (* generate test inputs uniformly at random *)
+trainingoutputs = MapThread[targetfunct,traininginputs]; (* compute target outputs on test inputs *)
+Print["Generalisation error: ", fitness[curr]]; (* fitness of best individual replacing training inputs with test inputs is generalisation error *) 
+
+
+
