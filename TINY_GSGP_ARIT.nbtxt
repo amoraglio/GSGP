@@ -1,0 +1,86 @@
+(* ************************************************************************************************************;
+
+TINY_GSGP_ARIT.nb: Geometric Semantic Genetic Programming in Mathematica for Arithmetic Expressions;
+
+Author:Alberto Moraglio (albmor@gmail.com);
+
+Features;
+- It evolves arithmentic expressions (polynomials or fractional polynomials if division is used);
+- Fithess is based on a training set (not on all inputs as for Boolean expressions); 
+- Algebraic simplification of offspring;
+- Generalisation test (on unseen examples); 
+
+************************************************************************************************************ *)
+
+
+(****** PARAMETERS ******)
+
+NUMVARS = 5; (* number of input variables *)
+DEPTH = 4; (* maximum depth of expressions in the initial population *)
+POPSIZE = 20; (* population size *)
+GENERATIONS = 100; (* number of generations *)
+NUMCASES = 10000; (* number of training examples *)
+MUTSTEP = 0.01; (* mutation step size *)
+TRUNC = 0.5; (* proportion of population to retain in truncation selection *)
+
+(************************)
+
+vars = Table[Symbol["x"<>ToString[i]],{i,NUMVARS}]; (* variable names *)
+
+randexpr[dep_]:= (* Create a random arithmetic expression *)
+	If[dep==1 || RandomReal[] < N[1.0/(2^dep-1)], (* terminal *)
+		If[RandomReal[]>N[1/(NUMVARS+1)], 
+			Return[RandomChoice[vars]], (* variable *)
+			RandomReal[{-1,1}]], (* number *)
+	If[RandomReal[]<N[1.0/5], 
+		Return[- randexpr[dep-1]], (* unary operation *)
+		Return[Apply[RandomChoice[{(#1+#2)&, (#1-#2)&,(#1*#2)& (*, (#1/#2)&*)}],{randexpr[dep-1],randexpr[dep-1]}]]]] (* binary operations *)
+
+(****** TRAINING SET ******)
+
+targetexpr = randexpr[DEPTH]; (* target is a random expression *)
+Print["Target expression: ", targetexpr];
+targetfunct = Function[Evaluate[vars],Evaluate[targetexpr]]; (* convert target into a function *)
+traininginputs = Table[RandomReal[{-1,1},NUMVARS],{NUMCASES}]; (* generate training inputs uniformly at random *)
+trainingoutputs = MapThread[targetfunct,traininginputs]; (* compute target outputs *)
+
+(**************************)
+
+fitness[individual_]:= Module[{indfunct, indoutputs}, (* fitness (error) function, lower is better *)
+	indfunct=Function[Evaluate[vars],Evaluate[individual]]; (* convert individual into a function *)
+	indoutputs =MapThread[indfunct,traininginputs]; (* compute individual outputs *)
+	EuclideanDistance[indoutputs,trainingoutputs]] ;  (* finess is distance between output vectors *)
+
+crossover[p1_,p2_]:= Module[{coeff},(* corssover combines linearly parents *)
+	coeff=RandomReal[];
+	(p1 * coeff) + (p2 * (1-coeff))];
+
+mutation[p_]:= p + MUTSTEP * (randexpr[DEPTH]-randexpr[DEPTH]); (* mutation perturbs parent with zero-average random function *)
+
+(****** EVOLVE ******)
+
+pop = Table[randexpr[DEPTH], {POPSIZE}]; (* initialise population *)
+For[gen=0,gen<GENERATIONS+1,gen++,
+	gradedpop = Table[{fitness[pop[[i]]],pop[[i]]},{i,POPSIZE}]; (* evaluate population fitness *)
+	sortedpop = Sort[gradedpop, #1[[1]]<#2[[1]]&] ; (* sort population on fitness *)
+	Print["gen: ",gen, " min fit: ",sortedpop[[1,1]]," avg fit: ", N[Mean[sortedpop[[All,1]]]]]; (* print stats *)
+	parentpop = sortedpop[[1;;Round[TRUNC*POPSIZE],2]]; (* selected parents *)
+	If[gen==GENERATIONS, Break[]];
+	For[i=1,i<POPSIZE+1,i++, (* create offspring population *)
+		par=RandomSample[parentpop,2]; (* pick two random parents *)
+		pop[[i]]=Simplify[mutation[crossover[par[[1]],par[[2]]]],TimeConstraint->0.1]; (* create offspring and simplify it *)
+	] 
+] 
+
+Print["Best individual in last population:"];
+Print[sortedpop[[1]]];(* genotype of final solution *)
+
+(****** GENERALISATION TEST ******)
+
+Print["Training error: ", sortedpop[[1,1]]]; (* fitness of best individual is training error *)
+traininginputs = Table[RandomReal[{-1,1},NUMVARS],{NUMCASES}]; (* generate test inputs uniformly at random *)
+trainingoutputs = MapThread[targetfunct,traininginputs]; (* compute target outputs on test inputs *)
+Print["Generalisation error: ", fitness[sortedpop[[1]]]]; (* fitness of best individual replacing training inputs with test inputs is generalisation error *) 
+
+
+
