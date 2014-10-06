@@ -119,7 +119,8 @@ def evolve():
 
     print 'Best individual in last population: '
     #print (sorted_pop[0]).geno() # reconstruct genotype of final solution (WARNING: EXPONENTIALLY LONG IN NUMBER OF GENERATIONS!)
-    print sorted_pop[0](True, True, True, True, True) # however querying it to make predictions is quick
+    print 'Query best individual in last population with all True inputs:'
+    print sorted_pop[0](*([True] * NUMVARS)) # however querying it to make predictions is quick
 
 evolve()
 
