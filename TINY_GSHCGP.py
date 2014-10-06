@@ -106,6 +106,7 @@ def climb():
 
     print 'Best individual: '
     print curr.geno() # reconstruct genotype of final solution (LINEAR SIZE IN NUMBER OF GENERATIONS)
-    print curr(True, True, True, True, True) # query final solution
+    print 'Query best individual with all True inputs:'
+    print curr(*([True] * NUMVARS)) # query final solution
 
 climb()
